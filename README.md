@@ -1,0 +1,1 @@
+# word-trainer-fast-api-server
