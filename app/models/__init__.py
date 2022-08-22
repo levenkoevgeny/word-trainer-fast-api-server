@@ -1,2 +1,2 @@
 from .user import User
-from .dictionary import Dictionary
+from .dictionary import Dictionary, Word
