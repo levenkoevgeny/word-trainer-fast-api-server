@@ -10,7 +10,7 @@ class Dictionary(Base):
     date_time_created = Column(DateTime, default=datetime.utcnow())
     owner_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     owner = relationship("User", back_populates="dictionaries")
-    words = relationship("Word", back_populates="dictionary")
+    words = relationship("Word", back_populates="dictionary", cascade="all, delete, delete-orphan")
 
     def __repr__(self):
         return self.dictionary_name
@@ -26,7 +26,6 @@ class Word(Base):
     date_time_created = Column(DateTime, default=datetime.utcnow())
     dictionary_id = Column(Integer, ForeignKey("dictionary.id"), nullable=False)
     dictionary = relationship("Dictionary", back_populates="words")
-
 
     def __repr__(self):
         return self.word_rus + ' ' + self.word_eng

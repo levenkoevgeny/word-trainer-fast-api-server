@@ -1,8 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -15,13 +13,34 @@ router = APIRouter()
 def read_dictionaries(
         db: Session = Depends(deps.get_db),
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Retrieve users.
+    Retrieve dictionaries.
     """
-    dictionaries = crud.dictionary.get_multi(db, skip=skip, limit=limit)
+
+    if crud.user.is_superuser(current_user):
+        dictionaries = crud.dictionary.get_multi(db, skip=skip, limit=limit)
+    else:
+        dictionaries = crud.dictionary.get_multi_by_owner(db, owner_id=current_user.id, skip=skip, limit=limit)
     return dictionaries
+
+
+@router.get("/{dictionary_id}", response_model=schemas.Dictionary)
+def get_by_id(
+        *,
+        db: Session = Depends(deps.get_db),
+        dictionary_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    dictionary = crud.dictionary.get(db, id=dictionary_id)
+    if not dictionary:
+        raise HTTPException(
+            status_code=404,
+            detail="The dictionary with this dictionary name does not exist in the system",
+        )
+    return dictionary
 
 
 @router.post("/", response_model=schemas.Dictionary)
@@ -29,6 +48,7 @@ def create_dictionary(
         *,
         db: Session = Depends(deps.get_db),
         dictionary_in: schemas.DictionaryCreate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new dictionary.
@@ -44,6 +64,7 @@ def update_dictionary(
         db: Session = Depends(deps.get_db),
         dictionary_id: int,
         dictionary_in: schemas.DictionaryUpdate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     dictionary = crud.dictionary.get(db, id=dictionary_id)
     if not dictionary:
@@ -52,4 +73,21 @@ def update_dictionary(
             detail="The dictionary with this dictionary name does not exist in the system",
         )
     dictionary = crud.dictionary.update(db, db_obj=dictionary, obj_in=dictionary_in)
+    return dictionary
+
+
+@router.delete("/{dictionary_id}", response_model=schemas.Dictionary)
+def delete_dictionary(
+        *,
+        db: Session = Depends(deps.get_db),
+        dictionary_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
+):
+    dictionary = crud.dictionary.get(db, id=dictionary_id)
+    if not dictionary:
+        raise HTTPException(
+            status_code=404,
+            detail="The dictionary with this dictionary name does not exist in the system",
+        )
+    dictionary = crud.dictionary.delete(db, db_obj=dictionary)
     return dictionary
