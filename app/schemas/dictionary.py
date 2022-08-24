@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Any
+from app.schemas.word import Word
 
 
 class DictionaryBase(BaseModel):
@@ -16,6 +17,7 @@ class DictionaryUpdate(DictionaryBase):
 
 class DictionaryInDb(DictionaryBase):
     id: Optional[int] = None
+    words: Optional[List[Word]]
 
     class Config:
         orm_mode = True
