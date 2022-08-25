@@ -25,6 +25,10 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "word-trainer-server"
 
+    FIRST_SUPERUSER: EmailStr = "levenko@example.com"
+    FIRST_SUPERUSER_PASSWORD: str = "1986"
+    EMAIL_TEST_USER: EmailStr = "user1@example.com"
+
     class Config:
         case_sensitive = True
 
