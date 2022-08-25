@@ -3,5 +3,5 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
-engine = create_engine("sqlite:///./sql_app.db", pool_pre_ping=True)
+engine = create_engine("sqlite:///./sql_app.db", pool_pre_ping=True, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
