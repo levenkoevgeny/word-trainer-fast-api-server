@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -14,16 +14,19 @@ def read_dictionaries(
         db: Session = Depends(deps.get_db),
         skip: int = 0,
         limit: int = 100,
+        dictionary_name: str = '',
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
+    print(dictionary_name)
     """
     Retrieve dictionaries.
     """
 
     if crud.user.is_superuser(current_user):
-        dictionaries = crud.dictionary.get_multi(db, skip=skip, limit=limit)
+        dictionaries = crud.dictionary.get_multi(db, skip=skip, limit=limit, dictionary_name=dictionary_name)
     else:
-        dictionaries = crud.dictionary.get_multi_by_owner(db, owner_id=current_user.id, skip=skip, limit=limit)
+        dictionaries = crud.dictionary.get_multi_by_owner(db, owner_id=current_user.id, skip=skip, limit=limit,
+                                                          dictionary_name=dictionary_name)
     return dictionaries
 
 

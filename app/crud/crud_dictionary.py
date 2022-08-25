@@ -12,12 +12,19 @@ class CRUDDictionary:
         return db.query(Dictionary).filter(Dictionary.id == id).first()
 
     def get_multi(
-            self, db: Session, *, skip: int = 0, limit: int = 100
+            self, db: Session, *, skip: int = 0, limit: int = 100, dictionary_name: str = ''
     ) -> List[Dictionary]:
-        return db.query(Dictionary).offset(skip).limit(limit).all()
+        full_q = db.query(Dictionary)
+        if dictionary_name:
+            return full_q.filter(Dictionary.dictionary_name.contains(dictionary_name)).offset(skip).limit(limit).all()
+        else:
+            return full_q.offset(skip).limit(limit).all()
 
-    def get_multi_by_owner(self, db: Session, *, owner_id: int, skip: int = 0, limit: int = 100) -> List[Dictionary]:
-        return db.query(Dictionary).filter(Dictionary.owner_id == owner_id).offset(skip).limit(limit).all()
+    def get_multi_by_owner(self, db: Session, *, owner_id: int, skip: int = 0, limit: int = 100, dictionary_name: str = '') -> List[Dictionary]:
+        print('crud', dictionary_name)
+        full_q = db.query(Dictionary)
+        return full_q.filter(Dictionary.owner_id == owner_id, Dictionary.dictionary_name.contains(dictionary_name)).offset(skip).limit(limit).all()
+
 
     def create(self, db: Session, *, obj_in: DictionaryCreate) -> Dictionary:
         db_obj = Dictionary(
